@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student",
+      "description": "Represents a student in the internship program.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "nis": { "type": "string" },
+        "school": { "type": "string" },
+        "joinDate": { "type": "string", "format": "date" }
+      },
+      "required": ["name", "nis", "school", "joinDate"]
+    },
+    "Attendance": {
+      "title": "Attendance",
+      "description": "A single attendance record for a student.",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "placement": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "time": { "type": "string" },
+        "type": { "type": "string", "enum": ["in", "out"] },
+        "status": { "type": "string", "enum": ["present", "late", "excused"] },
+        "isLate": { "type": "boolean" },
+        "notes": { "type": "string" },
+        "isBackdated": { "type": "boolean" }
+      },
+      "required": ["studentId", "placement", "date", "time", "type", "status"]
+    }
+  },
+  "firestore": {
+    "/students/{studentId}": {
+      "schema": "Student",
+      "description": "Master list of students."
+    },
+    "/attendance/{attendanceId}": {
+      "schema": "Attendance",
+      "description": "Flattened attendance logs for all students."
+    }
+  }
+}
