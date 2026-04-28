@@ -46,15 +46,23 @@ export const storageService = {
   getStudents: async (): Promise<Student[]> => {
     try {
       const querySnapshot = await getDocs(collection(db, 'students'));
-      let students: Student[] = [];
+      let rawStudents: Student[] = [];
       querySnapshot.forEach((doc) => {
         // @ts-ignore
-        students.push({ id: doc.id, ...doc.data() } as Student);
+        rawStudents.push({ id: doc.id, ...doc.data() } as Student);
+      });
+
+      // Deduplicate by name and NIS to ensure UI stays clean even if DB has duplicates
+      const seen = new Set();
+      let students = rawStudents.filter(s => {
+        const key = `${s.name}-${s.nis}`;
+        const duplicate = seen.has(key);
+        seen.add(key);
+        return !duplicate;
       });
 
       // Seed missing students if the list is noticeably incomplete
-      // We check if count is significantly less than default to handle partial failures
-      if (students.length < DEFAULT_STUDENTS.length * 0.8) {
+      if (students.length < DEFAULT_STUDENTS.length) {
         const existingNames = new Set(students.map(s => s.name));
         const missingStudents = DEFAULT_STUDENTS.filter(s => !existingNames.has(s.name));
         
